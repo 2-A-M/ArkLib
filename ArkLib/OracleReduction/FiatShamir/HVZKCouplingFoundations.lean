@@ -65,6 +65,24 @@ theorem simulateQ_addLift_fsChallengeUniform_query_run
     simulateQ_query]
   simp [OracleQuery.liftM_add_right_def, QueryImpl.addLift_def, QueryImpl.liftTarget_self]
 
+/-- Interactive analogue: under `impl.addLift challengeQueryImpl`, simulating a single challenge
+query is a fresh uniform sample of the challenge type, leaving the ambient state unchanged. This is
+the V_to_P twin of `simulateQ_addLift_fsChallengeUniform_query_run`; it matches the FS atom's reduced
+form, so a V_to_P round's two challenge draws are the same `$ᵗ`. -/
+theorem simulateQ_addLift_challengeQueryImpl_query_run
+    (impl : QueryImpl oSpec (StateT σ ProbComp))
+    (q : ([pSpec.Challenge]ₒ).Domain) (s : σ) :
+    StateT.run (simulateQ (impl.addLift (challengeQueryImpl (pSpec := pSpec)))
+      (query (spec := [pSpec.Challenge]ₒ) q :
+        OracleComp (oSpec + [pSpec.Challenge]ₒ) (([pSpec.Challenge]ₒ).Range q))) s
+        = (fun c => (c, s)) <$> (challengeQueryImpl (pSpec := pSpec) q) := by
+  rw [show (query (spec := [pSpec.Challenge]ₒ) q :
+        OracleComp (oSpec + [pSpec.Challenge]ₒ) (([pSpec.Challenge]ₒ).Range q))
+      = liftM (liftM (OracleSpec.query q) :
+          OracleQuery (oSpec + [pSpec.Challenge]ₒ) (([pSpec.Challenge]ₒ).Range q)) from rfl,
+    simulateQ_query]
+  simp [OracleQuery.liftM_add_right_def, QueryImpl.addLift_def, QueryImpl.liftTarget_self]
+
 /-- **Independent-draw commutation at `evalDist`** (the gating fact for the per-round V_to_P coupling
 step). Drawing `p` then `q` gives the same distribution as `q` then `p`. Holds UNCONDITIONALLY (the
 SPMF/`OptionT PMF` failure mass `P_p + P_q - P_p·P_q` is symmetric), via the proven point-mass swap
