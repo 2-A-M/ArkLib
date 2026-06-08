@@ -714,6 +714,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Soundness
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.TraceDataStructures
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.TraceTransform
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.State
+import ArkLib.OracleReduction.FiatShamir.HVZKCouplingFoundations
 import ArkLib.OracleReduction.FiatShamir.SingleSalt
 import ArkLib.OracleReduction.FiatShamir.StateRestorationTransport
 import ArkLib.OracleReduction.FiatShamir.ZKResidualBridge
