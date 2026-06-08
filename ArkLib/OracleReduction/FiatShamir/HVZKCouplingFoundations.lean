@@ -83,6 +83,18 @@ theorem simulateQ_addLift_challengeQueryImpl_query_run
     simulateQ_query]
   simp [OracleQuery.liftM_add_right_def, QueryImpl.addLift_def, QueryImpl.liftTarget_self]
 
+/-- `getChallenge`-form of the interactive challenge atom, matching exactly the `liftM (getChallenge
+i)` shape that `Prover.processRound` draws at a V_to_P round (so it rewrites the coupling goal
+directly). -/
+theorem simulateQ_addLift_challengeQueryImpl_getChallenge_run
+    (impl : QueryImpl oSpec (StateT σ ProbComp)) (i : pSpec.ChallengeIdx) (s : σ) :
+    StateT.run (simulateQ (impl.addLift (challengeQueryImpl (pSpec := pSpec)))
+      (liftM (pSpec.getChallenge i) :
+        OracleComp (oSpec + [pSpec.Challenge]ₒ) (pSpec.Challenge i))) s
+        = (fun c => (c, s)) <$> (challengeQueryImpl (pSpec := pSpec) ⟨i, ()⟩) := by
+  rw [ProtocolSpec.getChallenge]
+  exact simulateQ_addLift_challengeQueryImpl_query_run impl ⟨i, ()⟩ s
+
 /-- **Independent-draw commutation at `evalDist`** (the gating fact for the per-round V_to_P coupling
 step). Drawing `p` then `q` gives the same distribution as `q` then `p`. Holds UNCONDITIONALLY (the
 SPMF/`OptionT PMF` failure mass `P_p + P_q - P_p·P_q` is symmetric), via the proven point-mass swap
