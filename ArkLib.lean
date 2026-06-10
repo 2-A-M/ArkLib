@@ -1051,6 +1051,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb34Step
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemma
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaAssembly
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaFoundations
+import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaFrontier
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaHybrids
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Lookahead
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.ProverTransform
