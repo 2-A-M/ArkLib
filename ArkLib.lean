@@ -1050,6 +1050,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Accounting
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Align
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Budgets
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Step
+import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb23Decoded
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb23Delta0
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb23Step
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb34Step
