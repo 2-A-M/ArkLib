@@ -578,6 +578,223 @@ theorem keyLemmaEager_of_legs
 
 end LegReductions
 
+/-! ## Stage threading: whole-game domination from fixed-table verifier-stage domination
+
+The εA sub-run residual quantifies over the whole `Hyb₃`/`Hyb3Strict` games. The two games
+share the table sample, the prover stage, and every continuation — they differ **only** in
+the verifier stage's `gᵢ` realization. The bind-monotonicity bricks therefore reduce the
+whole-game domination to domination of the verifier stage at a *fixed* table carrier and
+shared memo (`splitVerifierStage`), which is exactly the granularity at which the per-query
+seeds (`probOutput_some_hitOnly_run_le_eager`) and the step-C-class d2fRaw induction
+operate. -/
+
+section StageThreading
+
+-- The whole-game/stage defeq alignments below walk the full Figure-4 pipeline term.
+set_option maxHeartbeats 1600000
+
+variable {T_H T_P : Type} [LawfulTraceNablaImpl T_H T_P StmtIn U]
+
+/-- The verifier stage of the split Figure-4 skeleton (`hybGameEagerSplit` lines 3) at a
+fixed challenge-oracle carrier `c` and shared `tr_i` memo: the `D2SQuery` run of the DSFS
+verifier through the per-hybrid `gᵢ` realization, logged and pushed into `ProbComp`. -/
+noncomputable def splitVerifierStage [SampleableType U]
+    {κ : Type} {challengeSpec : OracleSpec κ}
+    {M : Type} [Inhabited M] (δ : ℕ)
+    (Dχ : OracleDistribution challengeSpec)
+    (gImplV : GImpl (U := U) (StmtIn := StmtIn) (pSpec := pSpec) (δ := δ) challengeSpec M)
+    (oImpl : QueryImpl oSpec ProbComp)
+    (V : Verifier oSpec StmtIn StmtOut pSpec)
+    (c : Dχ.Carrier) (stmtIn : StmtIn) (messages : pSpec.Messages) (memo : M) :
+    ProbComp ((Option ((Option StmtOut
+        × D2SQueryState (δ := δ) (T_H := T_H) (T_P := T_P) (StmtIn := StmtIn)
+            (pSpec := pSpec) (U := U)) × M))
+      × QueryLog (oSpec + D2SChallengePlusUnitOracle (U := U) challengeSpec)) :=
+  let coins : QueryImpl unifSpec ProbComp := fun m => (liftM (unifSpec.query m) : ProbComp _)
+  let impl : QueryImpl (oSpec + D2SChallengePlusUnitOracle (U := U) challengeSpec) ProbComp :=
+    oImpl + (Dχ.toImpl c + (d2sUnitSampleImpl (U := U) + coins))
+  simulateQ impl
+    ((simulateQ loggingOracle
+      ((d2fRaw (T_H := T_H) (T_P := T_P) gImplV
+        ((V.duplexSpongeFiatShamir.run
+          stmtIn (fun i => match i with | ⟨0, _⟩ => messages)).run)
+        memo).run)).run)
+
+/-- **Whole-game success domination from stage domination**: if the `gV₂` verifier stage
+is success-pointwise dominated by the `gV₁` stage at every fixed carrier/statement/memo,
+then every successful output of the `gV₂` split game is dominated by the `gV₁` game.
+The shared sample/prover/line-4 stages transport the domination via the bind-mono bricks;
+aborted verifier stages are sent to `pure none` by the skeleton, so they never contribute
+to a success. -/
+theorem hybGameEagerSplit_probOutput_some_mono [SampleableType U]
+    {κ : Type} {challengeSpec : OracleSpec κ} {M : Type} [Inhabited M] (δ : ℕ)
+    (Dχ : OracleDistribution challengeSpec)
+    (gImplP gV₁ gV₂ : GImpl (U := U) (StmtIn := StmtIn) (pSpec := pSpec) (δ := δ)
+      challengeSpec M)
+    (lineFour : QueryLog (oSpec + challengeSpec) →
+      UnitSampleM U (QueryLog (oSpec + fsChallengeOracle StmtIn pSpec)))
+    (oImpl : QueryImpl oSpec ProbComp)
+    (V : Verifier oSpec StmtIn StmtOut pSpec)
+    (P : OracleComp (oSpec + duplexSpongeChallengeOracle StmtIn U)
+      (StmtIn × pSpec.Messages))
+    (hstage : ∀ (c : Dχ.Carrier) (stmtIn : StmtIn) (messages : pSpec.Messages) (memo : M)
+      (z : (Option ((Option StmtOut
+          × D2SQueryState (δ := δ) (T_H := T_H) (T_P := T_P) (StmtIn := StmtIn)
+              (pSpec := pSpec) (U := U)) × M))
+        × QueryLog (oSpec + D2SChallengePlusUnitOracle (U := U) challengeSpec)),
+      z.1.isSome = true →
+      Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₂ oImpl V
+          c stmtIn messages memo]
+        ≤ Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₁ oImpl V
+          c stmtIn messages memo])
+    (o : StmtIn × StmtOut × pSpec.Messages
+      × QueryLog (oSpec + fsChallengeOracle StmtIn pSpec)
+      × QueryLog (oSpec + fsChallengeOracle StmtIn pSpec)) :
+    Pr[= some o | hybGameEagerSplit (T_H := T_H) (T_P := T_P) δ Dχ gImplP gV₂ lineFour
+        oImpl V P]
+      ≤ Pr[= some o | hybGameEagerSplit (T_H := T_H) (T_P := T_P) δ Dχ gImplP gV₁ lineFour
+        oImpl V P] := by
+  unfold hybGameEagerSplit
+  refine probOutput_bind_mono_right _ _ _ _ fun c => ?_
+  dsimp only
+  refine probOutput_bind_mono_right _ _ _ _ fun pr => ?_
+  obtain ⟨pRes?, pLog⟩ := pr
+  rcases pRes? with _ | ⟨⟨⟨stmtIn, messages⟩, qst⟩, memo⟩
+  · exact le_of_eq rfl
+  · dsimp only
+    refine probOutput_bind_mono_left_event
+      (splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₁ oImpl V c stmtIn messages memo)
+      (splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₂ oImpl V c stmtIn messages memo)
+      _ (fun z => z.1.isSome = true) _
+      (hstage c stmtIn messages memo) ?_
+    intro z hz
+    obtain ⟨vRes?, vLog⟩ := z
+    rcases vRes? with _ | w
+    · dsimp only
+      exact probOutput_eq_zero_of_not_mem_support (by simp)
+    · exact absurd rfl hz
+
+/-- **Whole-game failure domination from stage domination**: the SPMF-failure analogue —
+the strict stage's failure mass is dominated, and aborted stages never fail downstream
+(`pure none`). -/
+theorem hybGameEagerSplit_probFailure_mono [SampleableType U]
+    {κ : Type} {challengeSpec : OracleSpec κ} {M : Type} [Inhabited M] (δ : ℕ)
+    (Dχ : OracleDistribution challengeSpec)
+    (gImplP gV₁ gV₂ : GImpl (U := U) (StmtIn := StmtIn) (pSpec := pSpec) (δ := δ)
+      challengeSpec M)
+    (lineFour : QueryLog (oSpec + challengeSpec) →
+      UnitSampleM U (QueryLog (oSpec + fsChallengeOracle StmtIn pSpec)))
+    (oImpl : QueryImpl oSpec ProbComp)
+    (V : Verifier oSpec StmtIn StmtOut pSpec)
+    (P : OracleComp (oSpec + duplexSpongeChallengeOracle StmtIn U)
+      (StmtIn × pSpec.Messages))
+    (hstage : ∀ (c : Dχ.Carrier) (stmtIn : StmtIn) (messages : pSpec.Messages) (memo : M)
+      (z : (Option ((Option StmtOut
+          × D2SQueryState (δ := δ) (T_H := T_H) (T_P := T_P) (StmtIn := StmtIn)
+              (pSpec := pSpec) (U := U)) × M))
+        × QueryLog (oSpec + D2SChallengePlusUnitOracle (U := U) challengeSpec)),
+      z.1.isSome = true →
+      Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₂ oImpl V
+          c stmtIn messages memo]
+        ≤ Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₁ oImpl V
+          c stmtIn messages memo])
+    (hstageFail : ∀ (c : Dχ.Carrier) (stmtIn : StmtIn) (messages : pSpec.Messages)
+      (memo : M),
+      Pr[⊥ | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₂ oImpl V
+          c stmtIn messages memo]
+        ≤ Pr[⊥ | splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₁ oImpl V
+          c stmtIn messages memo]) :
+    Pr[⊥ | hybGameEagerSplit (T_H := T_H) (T_P := T_P) δ Dχ gImplP gV₂ lineFour
+        oImpl V P]
+      ≤ Pr[⊥ | hybGameEagerSplit (T_H := T_H) (T_P := T_P) δ Dχ gImplP gV₁ lineFour
+        oImpl V P] := by
+  unfold hybGameEagerSplit
+  refine probFailure_bind_mono_right _ _ _ fun c => ?_
+  dsimp only
+  refine probFailure_bind_mono_right _ _ _ fun pr => ?_
+  obtain ⟨pRes?, pLog⟩ := pr
+  rcases pRes? with _ | ⟨⟨⟨stmtIn, messages⟩, qst⟩, memo⟩
+  · exact le_of_eq rfl
+  · dsimp only
+    refine probFailure_bind_mono_left_event
+      (splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₁ oImpl V c stmtIn messages memo)
+      (splitVerifierStage (T_H := T_H) (T_P := T_P) δ Dχ gV₂ oImpl V c stmtIn messages memo)
+      _ (fun z => z.1.isSome = true)
+      (hstage c stmtIn messages memo)
+      (hstageFail c stmtIn messages memo) ?_
+    intro z hz
+    obtain ⟨vRes?, vLog⟩ := z
+    rcases vRes? with _ | w
+    · dsimp only
+      simp
+    · exact absurd rfl hz
+
+/-- **The εA stage-domination residual** (the finest εA structural core): at every fixed
+FS table `c` and shared memo, the strict verifier stage is success-pointwise dominated by
+the real verifier stage, with dominated failure mass. This is the per-stage form of
+`Hyb34StrictSubRunResidual`, at exactly the granularity of the per-query seeds
+(`probOutput_some_hitOnly_run_le_eager` / `probFailure_hitOnly_run_le_eager`); open is the
+d2fRaw dispatcher induction (the step-C bisimulation class, in inequality form). -/
+def Hyb34VerifierStageDominationResidual [SampleableType U]
+    (T_H T_P : Type) [LawfulTraceNablaImpl T_H T_P StmtIn U] (δ : ℕ)
+    (Salt : Type) [SaltCodec U δ Salt]
+    [SampleableType (OracleFamily (fsChallengeOracle StmtIn pSpec))]
+    (oImpl : QueryImpl oSpec ProbComp) : Prop :=
+  ∀ (V : Verifier oSpec StmtIn StmtOut pSpec)
+    (c : (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec)).Carrier)
+    (stmtIn : StmtIn) (messages : pSpec.Messages)
+    (memo : D2SAlgoMemo StmtIn U δ Salt pSpec),
+    (∀ z, z.1.isSome = true →
+      Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ
+          (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+          (d2sCodecBridgeImplMemoEagerHitOnly (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+          oImpl V c stmtIn messages memo]
+        ≤ Pr[= z | splitVerifierStage (T_H := T_H) (T_P := T_P) δ
+          (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+          (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+          oImpl V c stmtIn messages memo])
+    ∧ Pr[⊥ | splitVerifierStage (T_H := T_H) (T_P := T_P) δ
+          (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+          (d2sCodecBridgeImplMemoEagerHitOnly (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+          oImpl V c stmtIn messages memo]
+        ≤ Pr[⊥ | splitVerifierStage (T_H := T_H) (T_P := T_P) δ
+          (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+          (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+          oImpl V c stmtIn messages memo]
+
+/-- **The εA structural reduction, stage form** (proven): fixed-table verifier-stage
+domination implies the whole-game sub-run residual — the εA leg's structural obligation is
+now a *single-stage, fixed-table* domination claim, the exact surface on which the proven
+per-query seeds and the step-C d2fRaw induction recipe operate. -/
+theorem hyb34StrictSubRun_of_stageDomination [SampleableType U]
+    (T_H T_P : Type) [LawfulTraceNablaImpl T_H T_P StmtIn U] (δ : ℕ)
+    (Salt : Type) [SaltCodec U δ Salt]
+    [SampleableType (OracleFamily (fsChallengeOracle StmtIn pSpec))]
+    (oImpl : QueryImpl oSpec ProbComp)
+    (h : Hyb34VerifierStageDominationResidual (oSpec := oSpec) (StmtIn := StmtIn)
+      (StmtOut := StmtOut) (pSpec := pSpec) (U := U) T_H T_P δ Salt oImpl) :
+    Hyb34StrictSubRunResidual (oSpec := oSpec) (StmtIn := StmtIn) (StmtOut := StmtOut)
+      (pSpec := pSpec) (U := U) T_H T_P δ Salt oImpl := by
+  intro V P
+  refine ⟨fun o => ?_, ?_⟩
+  · exact hybGameEagerSplit_probOutput_some_mono (T_H := T_H) (T_P := T_P) δ
+      (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+      (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (d2sCodecBridgeImplMemoEagerHitOnly (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (fun log => pure log) oImpl V P
+      (fun c stmtIn messages memo z hz => (h V c stmtIn messages memo).1 z hz) o
+  · exact hybGameEagerSplit_probFailure_mono (T_H := T_H) (T_P := T_P) δ
+      (OracleDistribution.uniform (fsChallengeOracle StmtIn pSpec))
+      (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (d2sCodecBridgeImplMemoEager (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (d2sCodecBridgeImplMemoEagerHitOnly (StmtIn := StmtIn) (δ := δ) (Salt := Salt))
+      (fun log => pure log) oImpl V P
+      (fun c stmtIn messages memo z hz => (h V c stmtIn messages memo).1 z hz)
+      (fun c stmtIn messages memo => (h V c stmtIn messages memo).2)
+
+end StageThreading
+
 end DuplexSpongeFS.Hyb34Legs
 
 #print axioms DuplexSpongeFS.Hyb34Legs.pmf_apply_le_at_sink
@@ -596,5 +813,8 @@ end DuplexSpongeFS.Hyb34Legs
 #print axioms DuplexSpongeFS.Hyb34Legs.strictAbortGap_nonneg_of_subRun
 #print axioms DuplexSpongeFS.Hyb34Legs.hyb34Step_of_legs
 #print axioms DuplexSpongeFS.Hyb34Legs.keyLemmaEager_of_legs
+#print axioms DuplexSpongeFS.Hyb34Legs.hybGameEagerSplit_probOutput_some_mono
+#print axioms DuplexSpongeFS.Hyb34Legs.hybGameEagerSplit_probFailure_mono
+#print axioms DuplexSpongeFS.Hyb34Legs.hyb34StrictSubRun_of_stageDomination
 
 end
