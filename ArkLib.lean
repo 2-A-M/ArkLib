@@ -1044,6 +1044,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Backtrack
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BadEvents
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BirthdayBound
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Completeness
+import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb34Step
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemma
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaAssembly
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.KeyLemmaFoundations
