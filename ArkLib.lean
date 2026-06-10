@@ -1045,6 +1045,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BadEvents
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BirthdayBound
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Completeness
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb01Step
+import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Align
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb12Step
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb23Step
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Hyb34Step
