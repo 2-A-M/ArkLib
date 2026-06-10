@@ -1041,6 +1041,7 @@ import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Defs
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Preliminaries
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.AbortAnalysis
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Backtrack
+import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BacktrackLemmas
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BadEvents
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.BirthdayBound
 import ArkLib.OracleReduction.FiatShamir.DuplexSponge.Security.Completeness
