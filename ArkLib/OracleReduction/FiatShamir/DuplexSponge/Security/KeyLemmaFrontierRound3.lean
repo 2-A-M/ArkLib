@@ -25,7 +25,10 @@ skeletons onto strictly finer residuals, plus two structural verdicts:
   (`BacktrackLemmas.lemma5_12HonestResidual_not_universal`), while the dedup'd-trace cores
   of CO25 Lemmas 5.12/5.14/5.16 are PROVEN (`lemma5_1{2,4,6}Honest_of_noRedundant`).
 
-This module wires both into the tightest honest top-level theorems:
+This module wires both into the tightest honest top-level theorems *as of round 3*.
+**Superseded by round 4**: `KeyLemmaFrontierRound4.keyLemmaEagerDelta0_of_coreResiduals(Eps23)`
+is now the tightest frontier (ten residuals — B1/B3/step-C-lift closed outright, A/B2/B4/
+step-A refined to cores); see the round-4 census in `KeyLemmaAssembly`.
 
 ## The `δ = 0` frontier (CO25 Lemma 5.1, eager surface, unsalted DSFS)
 

@@ -29,14 +29,20 @@ Wiring these together yields:
   Eq. 55 decomposition: Claims 5.21–5.23 plus any strict-split coupling pair summing to
   `claim5_24Bound` imply the eager key lemma.
 
-## Residual census after campaign round 3 (the honest remaining-work map)
+## Residual census after campaign round 4 (the honest remaining-work map)
 
 Round 2 split each step residual onto finer named residuals with proven skeletons
 (frontier: `KeyLemmaFrontier.keyLemmaEager_of_finestResiduals`, any `δ`). Round 3 ran four
 deeper lanes (`Hyb12Align`, `Hyb12Accounting`, `Hyb23Delta0`, `BacktrackLemmas`) plus the
-assembly `KeyLemmaFrontierRound3`. **The tightest top-level theorems are now the `δ = 0`
-frontiers** `KeyLemmaFrontierRound3.keyLemmaEagerDelta0_of_finestResiduals` (exact) and
-`keyLemmaEagerDelta0_of_finestResidualsEps23` (memo leg with ε-budget — the honest
+assembly `KeyLemmaFrontierRound3` (thirteen-residual `δ = 0` frontier). Round 4 ran four
+more (`Hyb12EagerLazy`, `Hyb12Budgets`, `Hyb23Decoded`, `Hyb23Delta0Lift`): **three
+round-3 residuals closed outright** (B1 eager↔lazy alignment, B3 prover `θ★` budget, the
+step C fixed-table salt-erasure lift — so `Hyb23SaltErasureResidual` is **unconditional at
+`δ = 0`**, `Hyb23Delta0Lift.hyb23SaltErasure_delta0`) and **four were replaced by strictly
+finer cores with proven reductions** (A, B2, B4, step A). **The tightest top-level
+theorems are now the ten-residual `δ = 0` frontiers**
+`KeyLemmaFrontierRound4.keyLemmaEagerDelta0_of_coreResiduals` (exact) and
+`keyLemmaEagerDelta0_of_coreResidualsEps23` (memo leg with ε-budget — the honest
 headline); the items below are exactly their hypotheses. `δ = 0` is the primary surface
 (the unsalted DSFS transform; CO25's salt exists for ZK): for `δ > 0` the salt-erasure leg
 of Claim 5.23 is genuinely false and the eager surface must first be re-keyed on salted
@@ -52,27 +58,36 @@ Open residuals **on the eager key-lemma critical path** (at `δ = 0`):
    made the §5.6 honest-bad `E`-mass channel **M2-free on the dedup'd surface**
    (`KeyLemmaFrontierRound3.probEvent_honestBadDedup_le_probEvent_E` /
    `honestBadDedup_birthday_of_lemma5_8` — no Lemma 5.12/5.14/5.16 hypotheses left).
-2. CO25 Claim 5.22 (`Hyb12Step` → `Hyb12Align` + `Hyb12Accounting`): six finest residuals,
-   assembled by `KeyLemmaFrontierRound3.hyb12Step_of_finestResiduals` (any `δ`):
-   `Hyb12LazyEagerResampleResidual` (lazy/eager fiber resampling through the memoized
-   pivot; plausibly true), `Hyb12RepeatDerivationResidual` (**doubtful** for non-injective
-   decoders — true for injective ones; honest general repair = birthday-budgeted
-   relaxation), `Hyb2FreshAlignResidual` / `Hyb12MidFreshAlignResidual` (eager↔lazy-memo
-   table alignments onto the fresh pivot), `Hyb12ProverPipelineBudgetResidual` (`θ★ = tₚ`
-   dispatcher budget) / `Hyb12VerifierPipelineBudgetResidual` (once per round). Proven in
-   the lanes: the fiber-resample table identity (`Hyb₁ = Hyb1TableResampled`, closed
-   outright), the `θ★` fresh-world accounting `tvDist_hyb2GameFresh_le` at exactly
-   `claim5_22Bound`, and both split reductions.
-3. CO25 Claim 5.23 (`Hyb23Step` → `Hyb23Delta0`), at `δ = 0` — **salt erasure's
-   distributional content is PROVEN** (`hyb23SaltErasure_delta0_of_lift`: the uniform
-   salted table section-restricts to the uniform unsalted table; the per-query memoized
-   bridges agree unconditionally). Remaining: `Hyb23SaltErasureLiftDelta0Residual` (a
-   deterministic fixed-table `simulateQ` bisimulation, no probabilistic content),
-   `Hyb23DecodedQueryResidual`@0 (needs a game-level reachability invariant; the upstream
-   `private`-parser blocker is moot — `hybEncodedMessagesBefore?` is a public wrapper),
-   `Hyb23MemoTransparency(Eps)Residual`@0 (exact-`0` doubtful at every `δ`: the repeat-key
-   re-exposure event is salt-free; any `ε ≤ 7/(2|Σ|^c)` is absorbed at the unchanged
-   `ηStarPaper` by the proven F1b slack `claimSum_add_le_ηStarPaper`).
+2. CO25 Claim 5.22 (`Hyb12Step` → `Hyb12Align`/`Hyb12Accounting` → `Hyb12EagerLazy` +
+   `Hyb12Budgets`): **four** remaining cores, assembled by
+   `KeyLemmaFrontierRound4.hyb12Step_of_coreResiduals` (any `δ`):
+   `Hyb12EagerLazy.Hyb12LazyRedrawCouplingResidual` (all-lazy fiber-redraw coupling — both
+   eager tables eliminated), `Hyb12Align.Hyb12RepeatDerivationResidual` (**doubtful** for
+   non-injective decoders — true for injective ones; honest general repair =
+   birthday-budgeted relaxation), `Hyb12EagerLazy.Hyb12MidCrossSpecAlignResidual`
+   (cross-spec `gSpec → eSpec` re-keying between two *lazy* games),
+   `Hyb12Budgets.Hyb12VerifierOncePerRoundResidual` (once per round at the bare `d2fRaw`
+   layer — reduces to a backtrack no-refire invariant via the round-indexed F4 toolkit;
+   **honest doubt flag**: whether it holds on *every* support path, sampled-capacity
+   collision paths included, mirrors the Lemma 5.12 raw-trace subtlety). Closed in round
+   4: `Hyb2FreshAlignResidual` (B1, outright — `hyb2FreshAlign_holds`, via the generic
+   lazy-memo = eager-uniform CPS master theorem) and `Hyb12ProverPipelineBudgetResidual`
+   (B3, outright — `hyb12ProverPipelineBudget`, `θ★ = tₚ`).
+3. CO25 Claim 5.23 (`Hyb23Step` → `Hyb23Delta0` → `Hyb23Decoded` + `Hyb23Delta0Lift`), at
+   `δ = 0` — **step C (salt erasure) is fully PROVEN** (`hyb23SaltErasure_delta0`: the
+   round-3 distributional content plus the round-4 fixed-table log-coupling bisimulation
+   `hyb23SaltErasureLiftDelta0`); the round-2 falsity flag is confined to `δ > 0`.
+   Remaining **two** cores (`KeyLemmaFrontierRound4.hyb23Step(Eps)_delta0_of_coreResiduals`):
+   `Hyb23Decoded.Hyb23DecodedCrossLiftDelta0Residual` (step A's fixed-table cross-spec
+   lift — the reachability invariant, `φ⁻¹`-injectivity on its success domain, and the
+   uniform `eSpec`/salted-table re-indexing are all discharged by
+   `hyb23DecodedQuery_delta0_of_crossLift`; what remains is the same deterministic
+   `simulateQ` bisimulation plumbing class as the proven step C lift) and
+   `Hyb23MemoTransparency(Eps)Residual`@0 (step B; exact-`0` doubtful at every `δ`: the
+   repeat-key re-exposure event is salt-free; any `ε ≤ 7/(2|Σ|^c)` is absorbed at the
+   unchanged `ηStarPaper` by the proven F1b slack `claimSum_add_le_ηStarPaper`). The
+   `δ = 0` chain is **not** fully closed — `Hyb23Step(Eps)Residual`@0 is a two-hypothesis
+   theorem, not a proven fact.
 4. CO25 Claim 5.24 (`Hyb34Step`): `Hyb34DivergenceResidual` / `Hyb34CollapseResidual`
    (the symmetric Eq. 55 halves at `claim5_24Bound/2` each; satisfiable only for
    `1 ≤ L`, see `claim5_24Bound_nonneg`). Unchanged from round 2; the dedup'd honest-bad
@@ -95,8 +110,12 @@ Off the critical path:
 **Closed in round 3** (all axiom-clean): `Hyb₁ = Hyb1TableResampled` (outright); the salt
 erasure distributional content at `δ = 0` (modulo the deterministic lift); the M2 dedup'd
 cores (outright) and the M2-free `E`-mass channel; the `θ★`/`claim5_22Bound` accounting
-theorem. No round-2 step residual closed outright; the splits above are the finest honest
-frontier.
+theorem.
+**Closed in round 4** (all axiom-clean): `Hyb2FreshAlignResidual` (B1, outright, any `δ`);
+`Hyb12ProverPipelineBudgetResidual` (B3, outright, any `δ`);
+`Hyb23SaltErasureLiftDelta0Residual` (outright) and with it
+`Hyb23SaltErasureResidual`@`δ=0` (step C, unconditional). The cores above are the finest
+honest frontier.
 
 The legacy `KeyLemma.KeyLemmaResidual` (i.i.d.-oracle surface, `ηStar` with exponent `C+1`)
 is numerically over-strong (`KeyLemmaFoundations.ηStar_le_ηStarPaper` direction) and likely
