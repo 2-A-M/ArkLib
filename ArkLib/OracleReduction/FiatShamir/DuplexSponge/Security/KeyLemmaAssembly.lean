@@ -29,61 +29,74 @@ Wiring these together yields:
   Eq. 55 decomposition: Claims 5.21–5.23 plus any strict-split coupling pair summing to
   `claim5_24Bound` imply the eager key lemma.
 
-## Residual census after campaign round 2 (the honest remaining-work map)
+## Residual census after campaign round 3 (the honest remaining-work map)
 
-Round 2 ran one lane per step residual (`Hyb01Step`/`Hyb12Step`/`Hyb23Step`/`Hyb34Step`).
-**No step residual closed outright**, but each now carries a *proven* split skeleton onto
-strictly finer named residuals; the composition is the round-2 frontier
-`KeyLemmaFrontier.keyLemmaEager_of_finestResiduals` (the tightest top-level theorem —
-the items below are exactly its hypotheses).
+Round 2 split each step residual onto finer named residuals with proven skeletons
+(frontier: `KeyLemmaFrontier.keyLemmaEager_of_finestResiduals`, any `δ`). Round 3 ran four
+deeper lanes (`Hyb12Align`, `Hyb12Accounting`, `Hyb23Delta0`, `BacktrackLemmas`) plus the
+assembly `KeyLemmaFrontierRound3`. **The tightest top-level theorems are now the `δ = 0`
+frontiers** `KeyLemmaFrontierRound3.keyLemmaEagerDelta0_of_finestResiduals` (exact) and
+`keyLemmaEagerDelta0_of_finestResidualsEps23` (memo leg with ε-budget — the honest
+headline); the items below are exactly their hypotheses. `δ = 0` is the primary surface
+(the unsalted DSFS transform; CO25's salt exists for ZK): for `δ > 0` the salt-erasure leg
+of Claim 5.23 is genuinely false and the eager surface must first be re-keyed on salted
+statements.
 
-Open residuals **on the eager key-lemma critical path**:
+Open residuals **on the eager key-lemma critical path** (at `δ = 0`):
 
 1. CO25 Claim 5.21 (`Hyb01Step`): `Hyb01OffEventCouplingResidual` (the off-`E` BackTrack
    coupling, §5.6/5.9–5.10) plus the Lemma 5.8 split `DDSFreshSwitchResidual εsw` (eager-
    lazy carrier switch) / `FreshTraceEventResidual εev` (fresh-world event decomposition)
    — or the unsplit `BirthdayBound.Lemma5_8EagerBirthdayResidual`
-   (`KeyLemmaFrontier.keyLemmaEager_of_birthdayLanes`). Proven in the lane: the SPMF TV
-   accumulator, the fresh/without-replacement switching lemma at `T(T−1)/(2|X|)`, flavor
-   budget recombination, and `hyb01Step_of_offEventCoupling_of_{birthday,freshSplit}`.
-2. CO25 Claim 5.22 (`Hyb12Step`): `Hyb12ResampleAlignResidual` (`Δ(Hyb₁, Hyb12Mid) = 0`
-   fiber-resample alignment; open content = the §5.4 no-repeated-derivation argument) and
-   `Hyb12BiasAccountingResidual` (`Δ(Hyb12Mid, Hyb₂) ≤ claim5_22Bound`; per-derivation
-   `ε_cdc,i` cost proven, open content = the θ★ pipeline accounting). Proven in the lane:
-   the cross-monad impl-closeness lifting brick, the per-query Eq. 53 coupling, and
-   `hyb12Step_of_resampleSplit`.
-3. CO25 Claim 5.23 (`Hyb23Step`): `Hyb23DecodedQueryResidual` (the paper's query
-   re-format, `= 0`; open core = the game-level lift, blocked on upstream `private`
-   parser visibility), `Hyb23MemoTransparencyResidual`, `Hyb23SaltErasureResidual`;
-   reduction `hyb23Step_of_saltedSplit` proven. **Structural flag (decide upstream)**:
-   the salt-erasure leg appears genuinely *false* for `δ > 0` (salt-grinding
-   distinguisher) — CO25 keeps the salted FS oracle through Hyb₄; restrict to `δ = 0` or
-   re-key the eager surface on salted statements. The memo-transparency exact-`0` is
-   also doubtful (repeat-key squeeze re-exposure is a birthday event).
+   (`KeyLemmaFrontier.keyLemmaEager_of_birthdayLanes`). Unchanged from round 2; round 3
+   made the §5.6 honest-bad `E`-mass channel **M2-free on the dedup'd surface**
+   (`KeyLemmaFrontierRound3.probEvent_honestBadDedup_le_probEvent_E` /
+   `honestBadDedup_birthday_of_lemma5_8` — no Lemma 5.12/5.14/5.16 hypotheses left).
+2. CO25 Claim 5.22 (`Hyb12Step` → `Hyb12Align` + `Hyb12Accounting`): six finest residuals,
+   assembled by `KeyLemmaFrontierRound3.hyb12Step_of_finestResiduals` (any `δ`):
+   `Hyb12LazyEagerResampleResidual` (lazy/eager fiber resampling through the memoized
+   pivot; plausibly true), `Hyb12RepeatDerivationResidual` (**doubtful** for non-injective
+   decoders — true for injective ones; honest general repair = birthday-budgeted
+   relaxation), `Hyb2FreshAlignResidual` / `Hyb12MidFreshAlignResidual` (eager↔lazy-memo
+   table alignments onto the fresh pivot), `Hyb12ProverPipelineBudgetResidual` (`θ★ = tₚ`
+   dispatcher budget) / `Hyb12VerifierPipelineBudgetResidual` (once per round). Proven in
+   the lanes: the fiber-resample table identity (`Hyb₁ = Hyb1TableResampled`, closed
+   outright), the `θ★` fresh-world accounting `tvDist_hyb2GameFresh_le` at exactly
+   `claim5_22Bound`, and both split reductions.
+3. CO25 Claim 5.23 (`Hyb23Step` → `Hyb23Delta0`), at `δ = 0` — **salt erasure's
+   distributional content is PROVEN** (`hyb23SaltErasure_delta0_of_lift`: the uniform
+   salted table section-restricts to the uniform unsalted table; the per-query memoized
+   bridges agree unconditionally). Remaining: `Hyb23SaltErasureLiftDelta0Residual` (a
+   deterministic fixed-table `simulateQ` bisimulation, no probabilistic content),
+   `Hyb23DecodedQueryResidual`@0 (needs a game-level reachability invariant; the upstream
+   `private`-parser blocker is moot — `hybEncodedMessagesBefore?` is a public wrapper),
+   `Hyb23MemoTransparency(Eps)Residual`@0 (exact-`0` doubtful at every `δ`: the repeat-key
+   re-exposure event is salt-free; any `ε ≤ 7/(2|Σ|^c)` is absorbed at the unchanged
+   `ηStarPaper` by the proven F1b slack `claimSum_add_le_ηStarPaper`).
 4. CO25 Claim 5.24 (`Hyb34Step`): `Hyb34DivergenceResidual` / `Hyb34CollapseResidual`
    (the symmetric Eq. 55 halves at `claim5_24Bound/2` each; satisfiable only for
-   `1 ≤ L`, see `claim5_24Bound_nonneg`). Proven in the lane: the εB per-query
-   determinism layer (eager-table keystone + hit-only coherent serve) and
-   `hyb34Step_of_divergence_collapse`; the generic skeleton
-   `VerifierReplay.hyb34Step_of_strictSplit` remains available for asymmetric splits
-   (consumed here by `keyLemmaEager_of_steps_strictSplit`).
+   `1 ≤ L`, see `claim5_24Bound_nonneg`). Unchanged from round 2; the dedup'd honest-bad
+   channel of item 1 also feeds this lane's bad-event mass.
 
-Open residuals **off the critical path** (bad-event bookkeeping for the §5.6 analysis,
-feeding the Claim 5.21/5.24 trace arguments):
+Off the critical path:
 
-5. `KeyLemmaFoundations.Lemma5_12HonestResidual` / `Lemma5_14HonestResidual` /
-   `Lemma5_16HonestResidual` (M2) — `¬E ⇒ ¬E_*honest` backtrack case analyses;
-   consumed by `BirthdayBound.probEvent_honestBad_le_probEvent_E` and
-   `BirthdayBound.honestBad_birthday_of_residuals`. Not attacked in round 2.
+5. M2 (`BacktrackLemmas`): CO25 Lemmas 5.12/5.14/5.16 (honest forms) are **PROVEN for
+   deduplicated traces** (`lemma5_1{2,4,6}Honest_of_noRedundant`) — the paper's own
+   setting, and the only form the `E`-mass plumbing needs (folded hypothesis-free into
+   `KeyLemmaFrontierRound3`). The raw-trace surface `Lemma5_12HonestResidual` is
+   **machine-checked FALSE** (`lemma5_12HonestResidual_not_universal`); the 5.14/5.16
+   redundant-trace corners stay open but nothing on the critical path consumes them.
 6. `BirthdayBound.Lemma5_8EagerBirthdayResidual` — subsumed by item 1 (either
    granularity discharges it via `Hyb01Step.lemma5_8Eager_of_freshSplit`).
 
-**Closed in round 1** (formerly open in `KeyLemmaFoundations`):
-`D2sQueryStepGSpecBudgetResidual` (F4), `D2fOuterImplSharedBudgetResidual` (F4b),
-`SimulatedProverChallengeBudgetResidual` (M1c), `SimulatedProverSharedBudgetResidual` (M1d)
-— all proven in `SimulatorBudgets`. Round 2 closed no step residual; it delivered the four
-split skeletons above (all proven, axiom-clean) and the frontier composition in
-`KeyLemmaFrontier`.
+**Closed in round 1**: `D2sQueryStepGSpecBudgetResidual` (F4),
+`D2fOuterImplSharedBudgetResidual` (F4b), `SimulatedProverChallengeBudgetResidual` (M1c),
+`SimulatedProverSharedBudgetResidual` (M1d) — all proven in `SimulatorBudgets`.
+**Closed in round 3** (all axiom-clean): `Hyb₁ = Hyb1TableResampled` (outright); the salt
+erasure distributional content at `δ = 0` (modulo the deterministic lift); the M2 dedup'd
+cores (outright) and the M2-free `E`-mass channel; the `θ★`/`claim5_22Bound` accounting
+theorem. No round-2 step residual closed outright; the splits above are the finest honest
+frontier.
 
 The legacy `KeyLemma.KeyLemmaResidual` (i.i.d.-oracle surface, `ηStar` with exponent `C+1`)
 is numerically over-strong (`KeyLemmaFoundations.ηStar_le_ηStarPaper` direction) and likely

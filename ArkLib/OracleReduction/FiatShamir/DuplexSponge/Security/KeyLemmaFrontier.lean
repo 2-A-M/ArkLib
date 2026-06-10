@@ -59,7 +59,12 @@ top-level theorems:
   (`Hyb34Step.claim5_24Bound_nonneg`): at `L = 0` the CO25 Eq. 55 bound is negative.
 - Off the critical path, the M2 residuals (`Lemma5_12/5_14/5_16HonestResidual`) feed the
   `E`-mass analyses of both `FreshTraceEventResidual` and `Hyb34DivergenceResidual` via
-  `BirthdayBound.probEvent_honestBad_le_probEvent_E`; they remain untouched.
+  `BirthdayBound.probEvent_honestBad_le_probEvent_E`. **Round-3 update**: the raw-trace
+  5.12 surface is machine-checked false
+  (`BacktrackLemmas.lemma5_12HonestResidual_not_universal`); consume the dedup'd-trace
+  channel instead, which is M2-free
+  (`KeyLemmaFrontierRound3.probEvent_honestBadDedup_le_probEvent_E`, hypothesis-free fold
+  of the proven `lemma5_1{2,4,6}Honest_of_noRedundant` cores).
 -/
 
 noncomputable section
